@@ -15,7 +15,7 @@ List.prototype.length = function () {
 };
 
 List.prototype.push = function (value) {
-    if (arguments.length !== 1 || typeof(arguments) == null || typeof(arguments) == undefined) {
+    if (arguments.length !== 1 || typeof (arguments) == null || typeof (arguments) == undefined) {
         return false;
     }
     return (this[this.length()] = value);
@@ -148,6 +148,20 @@ List.prototype.sort = function (f) {
         }
     }
 };
+
+List.prototype.reduce = function (fn, value) {
+    if (!fn) return 0;
+    let result = 0;
+    if (value) result = value;
+    else result = 0;
+    const newArray = this.getList();
+    if (typeof fn == "function") {
+        for (let i = 0; i < this.size(); i++) {
+            result = fn(result, newArray[i], i, newArray);
+        }
+    }
+    return result;
+}
 // List.prototype.test = function() {
 //     alert('a')
 // };
@@ -157,145 +171,183 @@ List.prototype.sort = function (f) {
 function linkedList() {
 }
 
-    linkedList.prototype.length = function () {
-        if (arguments.length !== 0) {
-            return false;
-        }
-        return this.root.length;
-    };
+linkedList.prototype.length = function () {
+    if (arguments.length !== 0) {
+        return false;
+    }
+    return this.root.length;
+};
 
-    this.root = {
+this.root = {
+    next: null,
+    prev: null,
+    length: 0,
+};
+
+linkedList.prototype.createNode = function (el) {
+    if (arguments.length !== 1) {
+        return false;
+    }
+    return {
+        el: el ? el : null,
         next: null,
         prev: null,
-        length: 0,
-    };
+        index: this.root.length,
+    }
+};
 
-    linkedList.prototype.createNode = function (el) {
-        if (arguments.length !== 1) {
-            return false;
-        }
-        return {
-            el: el ? el : null,
-            next: null,
-            prev: null,
-            index: this.root.length,
-        }
-    };
+linkedList.prototype.push = function push(el) {
+    if (arguments.length !== 1) {
+        return false;
+    }
+    const newNode = this.createNode(el);
+    let tmp = this.root;
+    while (tmp.next && (tmp.next !== this.root)) {
+        tmp.next.prev = tmp;
+        tmp = tmp.next;
+        newNode.prev = tmp
+    }
+    tmp.next = newNode;
+    this.root.prev = null;
+    this.root.length++;
+    return true;
+};
 
-    linkedList.prototype.push = function push(el) {
-        if (arguments.length !== 1) {
-            return false;
-        }
-        const newNode = this.createNode(el);
-        let tmp = this.root;
-        while (tmp.next && (tmp.next !== this.root)) {
-            tmp.next.prev = tmp;
-            tmp = tmp.next;
-            newNode.prev = tmp
-        }
-        tmp.next = newNode;
-        this.root.prev = null;
-        this.root.length++;
-        return true;
-    };
+linkedList.prototype.pop = function () {
+    if (this.root.length === 0) {
+        return false;
+    }
 
-    linkedList.prototype.pop = function () {
-        if (this.root.length === 0) {
-            return false;
-        }
-
-        if (this.root.length === 1) {
-            let deleted = this.root.next;
-            this.root.next = null;
-            this.root.length--;
-            return deleted;
-        }
-
-        let tmp = this.root;
-        while (tmp.next !== null) {
-            tmp = tmp.next;
-
-            if (tmp.index === (this.root.length - 2)) {
-                let deleted = tmp.next;
-                tmp.next == null;
-                this.root.length--;
-                return deleted
-            }
-        }
-    };
-
-    linkedList.prototype.unshift = function (el) {
-        const newNode = this.createNode(el);
-        if (this.root.next == null) {
-            this.root.next = newNode;
-            this.root.length++;
-        } else {
-            let tmp = this.root.next;
-            this.root.next = newNode;
-            this.root.next.next = tmp;
-            this.root.length++;
-        }
-        return true;
-    };
-
-    linkedList.prototype.shift = function () {
-        if (this.root.next = null) {
-            return false;
-        } else {
-            const tmp = this.root.next.next;
-            this.root.next = tmp;
-            this.root.length--;
-        }
-    };
-
-    linkedList.prototype.toString = function () {
-        let str = "";
-        let tmp = this.root;
-        while (tmp.next !== null) {
-            tmp = tmp.next;
-            str += tmp.el + ", ";
-        }
-        str = str.substring(0, str.length - 2);
-        return str;
-    };
-
-    linkedList.prototype.toArrayList = function () {
-        let tmp = this.root;
-        while (tmp.next !== null) {
-            tmp = tmp.next;
-            arrayList.push(tmp.el);
-        }
-        return arrayList;
-    };
-
-    linkedList.prototype.clear = function () {
+    if (this.root.length === 1) {
+        let deleted = this.root.next;
         this.root.next = null;
-        this.root.prev = null;
-        this.root.length = 0;
-    };
+        this.root.length--;
+        return deleted;
+    }
 
-    linkedList.prototype.sort = function (f) {
-        if (f && (typeof f == "function")) {
-            let firstNoda = this.root.next;
-            while (firstNoda && firstNoda.next) {
-                if (f(firstNoda.el, firstNoda.next.el) > 0) {
-                    [firstNoda.el, firstNoda.next.el] = [firstNoda.next.el, firstNoda.el];
-                }
-            }
-        } else {
-            let firstNoda = this.root.next;
-            if (!firstNoda) {
-                return false;
-            }
-            while (firstNoda && firstNoda.next) {
-                if (String(firstNoda.el) > String(firstNoda.next.el)) {
-                    [firstNoda.el, firstNoda.next.el] = [firstNoda.next.el, firstNoda.el];
-                }
-                firstNoda = firstNoda.next;
+    let tmp = this.root;
+    while (tmp.next !== null) {
+        tmp = tmp.next;
 
+        if (tmp.index === (this.root.length - 2)) {
+            let deleted = tmp.next;
+            tmp.next == null;
+            this.root.length--;
+            return deleted
+        }
+    }
+};
+
+linkedList.prototype.unshift = function (el) {
+    const newNode = this.createNode(el);
+    if (this.root.next == null) {
+        this.root.next = newNode;
+        this.root.length++;
+    } else {
+        let tmp = this.root.next;
+        this.root.next = newNode;
+        this.root.next.next = tmp;
+        this.root.length++;
+    }
+    return true;
+};
+
+linkedList.prototype.shift = function () {
+    if (this.root.next = null) {
+        return false;
+    } else {
+        const tmp = this.root.next.next;
+        this.root.next = tmp;
+        this.root.length--;
+    }
+};
+
+linkedList.prototype.toString = function () {
+    let str = "";
+    let tmp = this.root;
+    while (tmp.next !== null) {
+        tmp = tmp.next;
+        str += tmp.el + ", ";
+    }
+    str = str.substring(0, str.length - 2);
+    return str;
+};
+
+linkedList.prototype.toArrayList = function () {
+    let tmp = this.root;
+    while (tmp.next !== null) {
+        tmp = tmp.next;
+        arrayList.push(tmp.el);
+    }
+    return arrayList;
+};
+
+linkedList.prototype.clear = function () {
+    this.root.next = null;
+    this.root.prev = null;
+    this.root.length = 0;
+};
+
+linkedList.prototype.sort = function (f) {
+    if (f && (typeof f == "function")) {
+        let firstNoda = this.root.next;
+        while (firstNoda && firstNoda.next) {
+            if (f(firstNoda.el, firstNoda.next.el) > 0) {
+                [firstNoda.el, firstNoda.next.el] = [firstNoda.next.el, firstNoda.el];
             }
         }
+    } else {
+        let firstNoda = this.root.next;
+        if (!firstNoda) {
+            return false;
+        }
+        while (firstNoda && firstNoda.next) {
+            if (String(firstNoda.el) > String(firstNoda.next.el)) {
+                [firstNoda.el, firstNoda.next.el] = [firstNoda.next.el, firstNoda.el];
+            }
+            firstNoda = firstNoda.next;
 
+        }
+    }
+
+}
+linkedList.prototype.map = function (fn) {
+    if (typeof fn != "function") return this;
+    const newList = new linkedList();
+    let Noda = this.root;
+    let i = 0;
+    while (Noda.next) {
+        Noda = Noda.next;
+        newList.push(fn(Noda.el, i, linkedList));
+        i++;
+    }
+    return newList;
+}
+linkedList.prototype.reduce = function (fn, initValue) {
+    if (typeof fn != "function") return 0;
+    let result = 0;
+    if (initValue) result = initValue;
+    let Noda = this.root;
+    let i = 0;
+    while (Noda.next && Noda.next != null) {
+        Noda = Noda.next;
+        result = fn(result, Noda.el, i, linkedList)
+        i++;
+    }
+    return result;
+}
+
+linkedList.prototype.reverse = function () {
+    const newList = this;
+    let size = this.size();
+    newList.map(item => this.unshift(item));
+    let i = 0;
+    while (i <= size - 1) {
+        this.pop();
+        i++;
+    }
+
+    return this;
 }
 
 
@@ -306,9 +358,8 @@ function arrayList() {
 arrayList.prototype = Object.create(List.prototype);
 
 
+function LList() {
 
-    function LList() {
-
-    }
+}
 
 LList.prototype = Object.create(linkedList.prototype);
